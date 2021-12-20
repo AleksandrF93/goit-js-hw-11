@@ -6,8 +6,6 @@ import articlesTpl from './templates/photo-card.hbs';
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 
-const lightbox = new SimpleLightbox('.gallery a');
-
 const refs = {
   searchForm: document.querySelector('.search-form'),
   articlesContainer: document.querySelector('.gallery'),
@@ -34,17 +32,33 @@ function onSearch(e) {
     screenHits = 0;
     screenHits += hits.length;
     if (totalHits === 0) {
+      loadButtonHide();
       return Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
     }
     appendArticlesMarkup(hits);
     Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
+    const { height: cardHeight } = document
+      .querySelector(".gallery")
+      .firstElementChild.getBoundingClientRect();
+
+    window.scrollBy({
+      top: cardHeight * 2,
+      behavior: "smooth",
+    });
   });
 }
 
 function onLoadMore() {
   newsApiService.fetchArticles().then(({ hits, totalHits }) => {
     appendArticlesMarkup(hits);
-    lightbox.refresh();
+    const { height: cardHeight } = document
+      .querySelector(".gallery")
+      .firstElementChild.getBoundingClientRect();
+
+    window.scrollBy({
+      top: cardHeight * 2,
+      behavior: "smooth",
+    });
     screenHits += hits.length;
     if (screenHits >= totalHits) {
       loadButtonHide();
@@ -55,6 +69,8 @@ function onLoadMore() {
 
 function appendArticlesMarkup(hits) {
   refs.articlesContainer.insertAdjacentHTML('beforeend', articlesTpl(hits));
+  new SimpleLightbox('.gallery a');
+  
 }
 
 function clearArticlesContainer() {
@@ -68,3 +84,4 @@ function loadButtonHide() {
 function loadButtonShow() {
   refs.loadMoreButton.classList.remove('is-hidden');
 }
+
